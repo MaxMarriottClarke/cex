@@ -77,36 +77,36 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y ninja-build
       - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCEX_WERROR=ON
       - run: cmake --build build -j
-asan_ubsan:
-  name: ASan/UBSan
-  runs-on: ubuntu-latest
-  timeout-minutes: 20
-  steps:
-    - uses: actions/checkout@v4
-    - name: Configure (RelWithDebInfo + sanitizers)
-      run: cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSANITIZE_KIND=asan_ubsan
-    - name: Build
-      run: cmake --build build-asan -j
-    - name: Test (ctest)
-      env:
-        ASAN_OPTIONS: abort_on_error=1:strict_string_checks=1:check_initialization_order=1
-        UBSAN_OPTIONS: print_stacktrace=1:abort_on_error=1
-        ASAN_SYMBOLIZER_PATH: llvm-symbolizer
-      run: ctest --test-dir build-asan --output-on-failure
+  asan_ubsan:
+    name: ASan/UBSan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (RelWithDebInfo + sanitizers)
+        run: cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSANITIZE_KIND=asan_ubsan
+      - name: Build
+        run: cmake --build build-asan -j
+      - name: Test (ctest)
+        env:
+          ASAN_OPTIONS: abort_on_error=1:strict_string_checks=1:check_initialization_order=1
+          UBSAN_OPTIONS: print_stacktrace=1:abort_on_error=1
+          ASAN_SYMBOLIZER_PATH: llvm-symbolizer
+        run: ctest --test-dir build-asan --output-on-failure
 
-tsan:
-  name: TSan
-  runs-on: ubuntu-latest
-  timeout-minutes: 25
-  steps:
-    - uses: actions/checkout@v4
-    - name: Configure (RelWithDebInfo + TSan)
-      run: cmake -S . -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSANITIZE_KIND=tsan
-    - name: Build
-      run: cmake --build build-tsan -j
-    - name: Test (ctest)
-      env:
-        TSAN_OPTIONS: history_size=7 suppressions=scripts/tsan.supp
-      run: ctest --test-dir build-tsan --output-on-failure
+  tsan:
+    name: TSan
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (RelWithDebInfo + TSan)
+        run: cmake -S . -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSANITIZE_KIND=tsan
+      - name: Build
+        run: cmake --build build-tsan -j
+      - name: Test (ctest)
+        env:
+          TSAN_OPTIONS: history_size=7 suppressions=scripts/tsan.supp
+        run: ctest --test-dir build-tsan --output-on-failure
 
 
