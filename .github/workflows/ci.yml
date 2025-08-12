@@ -42,35 +42,34 @@ jobs:
 
           # Numeric compare (handles floats) using awk
           awk -v x="$avg_ns" -v b="$PERF_BUDGET_NS" 'BEGIN { exit !(x < b) }'
-tidy:
-  runs-on: ubuntu-22.04
-  steps:
-    - uses: actions/checkout@v4
+  tidy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LLVM 17 + clang-tidy-17
+        run: |
+          set -eux
+          curl -fsSL https://apt.llvm.org/llvm.sh -o llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17
+          # <-- llvm.sh doesn't install clang-tidy by default; install it explicitly
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy-17
+          clang-tidy-17 --version
 
-    - name: Install LLVM 17 + clang-tidy-17
-      run: |
-        set -eux
-        curl -fsSL https://apt.llvm.org/llvm.sh -o llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 17
-        # <-- llvm.sh doesn't install clang-tidy by default; install it explicitly
-        sudo apt-get update
-        sudo apt-get install -y clang-tidy-17
-        clang-tidy-17 --version
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build jq
 
-    - run: sudo apt-get update && sudo apt-get install -y ninja-build jq
+      - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - run: cmake --build build -j
 
-    - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    - run: cmake --build build -j
-
-    - name: run clang-tidy (src/include only; fail on issues)
-      run: |
-        set -e
-        files=$(jq -r '.[].file' build/compile_commands.json \
-          | awk -v root="$GITHUB_WORKSPACE" 'index($0, root"/src/")==1 || index($0, root"/include/")==1' \
-          | grep -E '\.(c|cc|cpp|cxx|h|hpp)$' | sort -u)
-        [ -z "$files" ] && exit 0
-        clang-tidy-17 -p build --warnings-as-errors='*' $files
+      - name: run clang-tidy (src/include only; fail on issues)
+        run: |
+          set -e
+          files=$(jq -r '.[].file' build/compile_commands.json \
+            | awk -v root="$GITHUB_WORKSPACE" 'index($0, root"/src/")==1 || index($0, root"/include/")==1' \
+            | grep -E '\.(c|cc|cpp|cxx|h|hpp)$' | sort -u)
+          [ -z "$files" ] && exit 0
+          clang-tidy-17 -p build --warnings-as-errors='*' $files
 
 
   werror:
