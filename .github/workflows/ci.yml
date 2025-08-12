@@ -1,0 +1,27 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  build_test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
+
+  perf_gate:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23
+      - run: cmake --build build -j
+      - name: run bench and check budget
+        run: |
+          set -e
+          out=$(./build/bench_update | tee /dev/stderr)
+          avg_ns=$(echo "$out" | awk '/ns\/op/ {print $(NF-1)}' | tail -1)
+          echo "avg_ns=$avg_ns"
+          test "${avg_ns%.*}" -lt 150000  # 150µs avg for Phase 0
