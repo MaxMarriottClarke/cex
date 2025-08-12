@@ -46,9 +46,20 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y ninja-build clang-tidy jq
+
+      - name: Install clang-tidy 17
+        run: |
+          set -eux
+          curl -fsSL https://apt.llvm.org/llvm.sh -o llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17
+          clang-tidy-17 --version
+
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build jq
+
       - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - run: cmake --build build -j
+
       - name: run clang-tidy (src/include only; fail on issues)
         run: |
           set -e
@@ -56,8 +67,9 @@ jobs:
             | awk -v root="$GITHUB_WORKSPACE" 'index($0, root"/src/")==1 || index($0, root"/include/")==1' \
             | grep -E '\.(c|cc|cpp|cxx|h|hpp)$' | sort -u)
           [ -z "$files" ] && exit 0
-          # Force a standard clang-tidy understands (last flag wins)
-          clang-tidy -p build --extra-arg=-std=gnu++2b --warnings-as-errors='*' $files
+          # With clang-tidy 17, no extra-arg override is needed.
+          clang-tidy-17 -p build --warnings-as-errors='*' $files
+
 
 
 
