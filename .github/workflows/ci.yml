@@ -95,9 +95,7 @@ jobs:
         run: ctest --test-dir build-asan --output-on-failure
 
   tsan:
-    name: TSan
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Configure (RelWithDebInfo + TSan)
@@ -106,7 +104,8 @@ jobs:
         run: cmake --build build-tsan -j
       - name: Test (ctest)
         env:
-          TSAN_OPTIONS: history_size=7 suppressions=scripts/tsan.supp
+          TSAN_OPTIONS: history_size=7 suppressions=${{ github.workspace }}/scripts/tsan.supp
         run: ctest --test-dir build-tsan --output-on-failure
+
 
 
