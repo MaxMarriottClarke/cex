@@ -42,3 +42,17 @@ jobs:
 
           # Numeric compare (handles floats) using awk
           awk -v x="$avg_ns" -v b="$PERF_BUDGET_NS" 'BEGIN { exit !(x < b) }'
+  tidy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build clang-tidy jq
+      - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - run: cmake --build build -j
+      - name: run clang-tidy (fail on any warning)
+        run: |
+          set -e
+          files=$(jq -r '.[].file' build/compile_commands.json | grep -E '\.(c|cc|cpp|cxx)$' | sort -u)
+          [ -z "$files" ] && exit 0
+          # --warnings-as-errors=* enforces .clang-tidy + makes CI fail on issues
+          clang-tidy -p build --warnings-as-errors='*' $files
