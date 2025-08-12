@@ -47,7 +47,6 @@ tidy:
   steps:
     - uses: actions/checkout@v4
 
-    # Add LLVM apt repo and install LLVM 17 toolchain
     - name: Install LLVM 17 + clang-tidy-17
       run: |
         set -eux
