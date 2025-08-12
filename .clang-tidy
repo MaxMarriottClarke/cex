@@ -9,7 +9,8 @@ Checks: >
   -readability-braces-around-statements,
   -readability-else-after-return,
   -modernize-use-auto,
-  -modernize-use-trailing-return-type
+  -modernize-use-trailing-return-type,
+  -readability-simplify-boolean-expr   # <-- disable crashing check on LLVM-14
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(include|src)/'
 AnalyzeTemporaryDtors: false
