@@ -52,11 +52,13 @@ jobs:
       - name: run clang-tidy (src/include only; fail on issues)
         run: |
           set -e
+          # Only files inside this repo's src/ or include/, not build/_deps/*
           files=$(jq -r '.[].file' build/compile_commands.json \
-                  | grep -E '^(.*/)?(src|include)/.*\.(c|cc|cpp|cxx|h|hpp)$' \
-                  | sort -u)
+            | awk -v root="$GITHUB_WORKSPACE" 'index($0, root"/src/")==1 || index($0, root"/include/")==1' \
+            | grep -E '\.(c|cc|cpp|cxx|h|hpp)$' | sort -u)
           [ -z "$files" ] && exit 0
           clang-tidy -p build --warnings-as-errors='*' $files
+
 
   werror:
     runs-on: ubuntu-22.04
