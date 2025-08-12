@@ -9,6 +9,7 @@ add_library(cex_util
   util/tracing.cpp
   core/time.cpp
   core/id.cpp
+  core/book.cpp  
 )
 
 target_include_directories(cex_util PUBLIC ${CMAKE_SOURCE_DIR}/include)
