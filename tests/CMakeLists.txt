@@ -11,3 +11,10 @@ target_link_libraries(bench_update PRIVATE cex_util nanobench)
 # NEW: place test/bench executables in the top-level build dir
 set_target_properties(unit_time bench_update
   PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+  
+# ---- Apply sanitizers to tests/benches ----
+EnableProjectSanitizers(${SANITIZE_KIND}
+  unit_time
+  bench_update
+)

@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.26)
 project(cex LANGUAGES CXX)
+# ---- Sanitizers toggle (OFF by default) ----
+# Valid values: asan_ubsan | tsan | OFF
+option(SANITIZE_KIND "Enable runtime sanitizers for selected targets" OFF)
+include(cmake/Sanitizers.cmake)
+
 
 include(CTest)
 enable_testing()
@@ -8,6 +13,12 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# ---- Sanitizers toggle (OFF by default) ----
+# Valid values: asan_ubsan | tsan | OFF
+option(SANITIZE_KIND "Enable runtime sanitizers for selected targets" OFF)
+include(cmake/Sanitizers.cmake)
+
 
 # Common warnings/flags
 add_library(cex_opts INTERFACE)

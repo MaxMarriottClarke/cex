@@ -31,3 +31,10 @@ endif()
 # ---- main exe ----------------------------------------------------------------
 add_executable(cex_main main/cex_main.cpp)
 target_link_libraries(cex_main PRIVATE cex_util)
+
+
+# ---- Apply sanitizers to src targets (executables + libs) ----
+EnableProjectSanitizers(${SANITIZE_KIND}
+  cex_main
+  cex_util
+)
