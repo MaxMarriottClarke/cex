@@ -56,3 +56,11 @@ jobs:
           [ -z "$files" ] && exit 0
           # --warnings-as-errors=* enforces .clang-tidy + makes CI fail on issues
           clang-tidy -p build --warnings-as-errors='*' $files
+  werror:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCEX_WERROR=ON
+      - run: cmake --build build -j
+

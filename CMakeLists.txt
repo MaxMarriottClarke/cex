@@ -14,5 +14,11 @@ add_library(cex_opts INTERFACE)
 target_compile_options(cex_opts INTERFACE
   -Wall -Wextra -Wpedantic -Wconversion -fno-omit-frame-pointer)
 
+option(CEX_WERROR "Treat warnings as errors" OFF)
+if(CEX_WERROR)
+  target_compile_options(cex_opts INTERFACE -Werror)
+endif()
+
+
 add_subdirectory(src)
 add_subdirectory(tests)
