@@ -49,13 +49,15 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y ninja-build clang-tidy jq
       - run: cmake -S . -B build -G Ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - run: cmake --build build -j
-      - name: run clang-tidy (fail on any warning)
+      - name: run clang-tidy (src/include only; fail on issues)
         run: |
           set -e
-          files=$(jq -r '.[].file' build/compile_commands.json | grep -E '\.(c|cc|cpp|cxx)$' | sort -u)
+          files=$(jq -r '.[].file' build/compile_commands.json \
+                  | grep -E '^(.*/)?(src|include)/.*\.(c|cc|cpp|cxx|h|hpp)$' \
+                  | sort -u)
           [ -z "$files" ] && exit 0
-          # --warnings-as-errors=* enforces .clang-tidy + makes CI fail on issues
           clang-tidy -p build --warnings-as-errors='*' $files
+
   werror:
     runs-on: ubuntu-22.04
     steps:

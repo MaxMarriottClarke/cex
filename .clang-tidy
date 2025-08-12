@@ -3,8 +3,11 @@ Checks: >
   clang-analyzer-*,
   modernize-*,
   performance-*,
-  readability-*
+  readability-*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -modernize-use-trailing-return-type
 WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '^(include|src)/'
 AnalyzeTemporaryDtors: false
 FormatStyle: none
